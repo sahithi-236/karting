@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Go-Karting Booking</title>
+    <title>Go-Karting Booking Form</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body { font-family: Arial; background: #f0f0f0; padding: 20px; }
@@ -10,32 +10,13 @@
         label { display: block; margin-bottom: 5px; }
         input, select { width: 100%; padding: 8px; }
         button { background: #4CAF50; color: #fff; padding: 10px; border: none; border-radius: 5px; }
+        #amount { font-weight: bold; margin-bottom: 15px; }
     </style>
 </head>
 <body>
 <div class="form-container">
-    <h2>Go-Karting Booking</h2>
+    <h2>Go-Karting Booking Form</h2>
     <form id="kartForm">
-        <div class="form-group">
-            <label for="name1">Participant 1 Name:</label>
-            <input type="text" id="name1" required>
-        </div>
-        <div class="form-group">
-            <label for="age1">Participant 1 Age:</label>
-            <input type="number" id="age1" min="1" max="16" required>
-        </div>
-        <div class="form-group">
-            <label for="name2">Participant 2 Name:</label>
-            <input type="text" id="name2" required>
-        </div>
-        <div class="form-group">
-            <label for="age2">Participant 2 Age:</label>
-            <input type="number" id="age2" min="1" max="16" required>
-        </div>
-        <div class="form-group">
-            <label for="laps">Number of Laps:</label>
-            <input type="number" id="laps" min="1" max="20" required>
-        </div>
         <div class="form-group">
             <label for="kartType">Kart Type:</label>
             <select id="kartType" required>
@@ -44,37 +25,158 @@
                 <option value="Couple">Couple Kart</option>
             </select>
         </div>
-        <button type="submit">Proceed to Payment</button>
+        <div id="singleFields" style="display:none;">
+            <div class="form-group">
+                <label for="singleName">Name:</label>
+                <input type="text" id="singleName">
+            </div>
+            <div class="form-group">
+                <label for="singleAge">Age:</label>
+                <input type="number" id="singleAge" min="17">
+            </div>
+            <div class="form-group">
+                <label for="singlePhone">Phone Number:</label>
+                <input type="tel" id="singlePhone" pattern="[0-9]{10}">
+            </div>
+        </div>
+        <div id="coupleFields" style="display:none;">
+            <div class="form-group">
+                <label for="coupleName1">Participant 1 Name:</label>
+                <input type="text" id="coupleName1">
+            </div>
+            <div class="form-group">
+                <label for="coupleAge1">Participant 1 Age:</label>
+                <input type="number" id="coupleAge1" min="17">
+            </div>
+            <div class="form-group">
+                <label for="coupleName2">Participant 2 Name:</label>
+                <input type="text" id="coupleName2">
+            </div>
+            <div class="form-group">
+                <label for="coupleAge2">Participant 2 Age:</label>
+                <input type="number" id="coupleAge2" min="17">
+            </div>
+        </div>
+        <div class="form-group" id="lapsGroup" style="display:none;">
+            <label for="laps">Number of Laps:</label>
+            <select id="laps">
+                <option value="">Select</option>
+                <option value="5">5</option>
+                <option value="10">10</option>
+            </select>
+        </div>
+        <div id="amount"></div>
+        <button type="submit" style="display:none;" id="submitBtn">Proceed to Payment</button>
     </form>
     <div id="result"></div>
 </div>
 <script>
+const kartType = document.getElementById('kartType');
+const singleFields = document.getElementById('singleFields');
+const coupleFields = document.getElementById('coupleFields');
+const lapsGroup = document.getElementById('lapsGroup');
+const laps = document.getElementById('laps');
+const amountDiv = document.getElementById('amount');
+const submitBtn = document.getElementById('submitBtn');
+
+function generateInvoiceId() {
+    // Simple unique ID: "GK" + current timestamp + random 3 digits
+    return 'GK' + Date.now() + Math.floor(Math.random() * 900 + 100);
+}
+
+function updateForm() {
+    singleFields.style.display = 'none';
+    coupleFields.style.display = 'none';
+    lapsGroup.style.display = 'none';
+    amountDiv.textContent = '';
+    submitBtn.style.display = 'none';
+    if (kartType.value === 'Single') {
+        singleFields.style.display = '';
+        lapsGroup.style.display = '';
+    } else if (kartType.value === 'Couple') {
+        coupleFields.style.display = '';
+        lapsGroup.style.display = '';
+    }
+}
+kartType.addEventListener('change', updateForm);
+
+function updateAmount() {
+    let amt = '';
+    if (kartType.value === 'Single') {
+        if (laps.value === '5') amt = '₹300';
+        else if (laps.value === '10') amt = '₹500';
+    } else if (kartType.value === 'Couple') {
+        if (laps.value === '5') amt = '₹500';
+        else if (laps.value === '10') amt = '₹750';
+    }
+    if (amt) {
+        amountDiv.textContent = 'Amount to Pay: ' + amt;
+        submitBtn.style.display = '';
+    } else {
+        amountDiv.textContent = '';
+        submitBtn.style.display = 'none';
+    }
+}
+laps.addEventListener('change', updateAmount);
+kartType.addEventListener('change', updateAmount);
+
 document.getElementById('kartForm').addEventListener('submit', function(e) {
     e.preventDefault();
-    const name1 = document.getElementById('name1').value.trim();
-    const age1 = parseInt(document.getElementById('age1').value, 10);
-    const name2 = document.getElementById('name2').value.trim();
-    const age2 = parseInt(document.getElementById('age2').value, 10);
-    const laps = document.getElementById('laps').value;
-    const kartType = document.getElementById('kartType').value;
-
-    if (age1 > 16 || age2 > 16) {
-        alert('Both participants must be aged 16 or below.');
+    let details = '';
+    let amt = '';
+    const invoiceId = generateInvoiceId();
+    if (kartType.value === 'Single') {
+        const name = document.getElementById('singleName').value.trim();
+        const age = parseInt(document.getElementById('singleAge').value, 10);
+        const phone = document.getElementById('singlePhone').value.trim();
+        if (!name || !age || !phone || phone.length !== 10) {
+            alert('Please fill all fields correctly.');
+            return;
+        }
+        if (age < 17) {
+            alert('Participant age must be greater than 16.');
+            return;
+        }
+        details = `<p><strong>Name:</strong> ${name}</p>
+                   <p><strong>Age:</strong> ${age}</p>
+                   <p><strong>Phone:</strong> ${phone}</p>`;
+        amt = laps.value === '5' ? '₹300' : '₹500';
+    } else if (kartType.value === 'Couple') {
+        const name1 = document.getElementById('coupleName1').value.trim();
+        const age1 = parseInt(document.getElementById('coupleAge1').value, 10);
+        const name2 = document.getElementById('coupleName2').value.trim();
+        const age2 = parseInt(document.getElementById('coupleAge2').value, 10);
+        if (!name1 || !age1 || !name2 || !age2) {
+            alert('Please fill all fields correctly.');
+            return;
+        }
+        if (age1 < 17 || age2 < 17) {
+            alert('Both participants must be older than 16.');
+            return;
+        }
+        details = `<p><strong>Participant 1:</strong> ${name1} (Age: ${age1})</p>
+                   <p><strong>Participant 2:</strong> ${name2} (Age: ${age2})</p>`;
+        amt = laps.value === '5' ? '₹500' : '₹750';
+    } else {
+        alert('Please select kart type.');
         return;
     }
-
-    // Simulate payment success
-    // Assign a karting time (admin decides, here we simulate with the next available slot)
+    if (!laps.value) {
+        alert('Please select number of laps.');
+        return;
+    }
+    // Simulate payment and assign time
     const now = new Date();
-    now.setMinutes(now.getMinutes() + 15); // e.g., next slot in 15 minutes
+    now.setMinutes(now.getMinutes() + 15);
     const slot = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
     document.getElementById('result').innerHTML = `
         <h3>Payment Successful!</h3>
+        <p><strong>Invoice ID:</strong> ${invoiceId}</p>
         <p>Your Go-Karting booking is confirmed.</p>
-        <p><strong>Participants:</strong> ${name1} & ${name2}</p>
-        <p><strong>Kart Type:</strong> ${kartType}</p>
-        <p><strong>Laps:</strong> ${laps}</p>
+        ${details}
+        <p><strong>Kart Type:</strong> ${kartType.value}</p>
+        <p><strong>Laps:</strong> ${laps.value}</p>
+        <p><strong>Amount Paid:</strong> ${amt}</p>
         <p><strong>Your Karting Time:</strong> ${slot}</p>
         <p>Please show this message at the entrance.</p>
     `;
