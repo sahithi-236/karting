@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Go-Karting Booking</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: Arial; background: #f0f0f0; padding: 20px; }
+        .form-container { background: #fff; padding: 20px; border-radius: 10px; max-width: 400px; margin: auto; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; }
+        input, select { width: 100%; padding: 8px; }
+        button { background: #4CAF50; color: #fff; padding: 10px; border: none; border-radius: 5px; }
+    </style>
+</head>
+<body>
+<div class="form-container">
+    <h2>Go-Karting Booking</h2>
+    <form id="kartForm">
+        <div class="form-group">
+            <label for="name1">Participant 1 Name:</label>
+            <input type="text" id="name1" required>
+        </div>
+        <div class="form-group">
+            <label for="age1">Participant 1 Age:</label>
+            <input type="number" id="age1" min="1" max="16" required>
+        </div>
+        <div class="form-group">
+            <label for="name2">Participant 2 Name:</label>
+            <input type="text" id="name2" required>
+        </div>
+        <div class="form-group">
+            <label for="age2">Participant 2 Age:</label>
+            <input type="number" id="age2" min="1" max="16" required>
+        </div>
+        <div class="form-group">
+            <label for="laps">Number of Laps:</label>
+            <input type="number" id="laps" min="1" max="20" required>
+        </div>
+        <div class="form-group">
+            <label for="kartType">Kart Type:</label>
+            <select id="kartType" required>
+                <option value="">Select</option>
+                <option value="Single">Single Kart</option>
+                <option value="Couple">Couple Kart</option>
+            </select>
+        </div>
+        <button type="submit">Proceed to Payment</button>
+    </form>
+    <div id="result"></div>
+</div>
+<script>
+document.getElementById('kartForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const name1 = document.getElementById('name1').value.trim();
+    const age1 = parseInt(document.getElementById('age1').value, 10);
+    const name2 = document.getElementById('name2').value.trim();
+    const age2 = parseInt(document.getElementById('age2').value, 10);
+    const laps = document.getElementById('laps').value;
+    const kartType = document.getElementById('kartType').value;
+
+    if (age1 > 16 || age2 > 16) {
+        alert('Both participants must be aged 16 or below.');
+        return;
+    }
+
+    // Simulate payment success
+    // Assign a karting time (admin decides, here we simulate with the next available slot)
+    const now = new Date();
+    now.setMinutes(now.getMinutes() + 15); // e.g., next slot in 15 minutes
+    const slot = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    document.getElementById('result').innerHTML = `
+        <h3>Payment Successful!</h3>
+        <p>Your Go-Karting booking is confirmed.</p>
+        <p><strong>Participants:</strong> ${name1} & ${name2}</p>
+        <p><strong>Kart Type:</strong> ${kartType}</p>
+        <p><strong>Laps:</strong> ${laps}</p>
+        <p><strong>Your Karting Time:</strong> ${slot}</p>
+        <p>Please show this message at the entrance.</p>
+    `;
+    this.style.display = 'none';
+});
+</script>
+</body>
+</html>
